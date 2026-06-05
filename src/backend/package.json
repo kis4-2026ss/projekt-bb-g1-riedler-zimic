@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "main": "server.mjs",
   "scripts": {
-    "start": "node server.mjs"
+    "start": "node server.mjs",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   },
   "author": "",
   "license": "MIT",
