@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WishBox</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="site-header" role="banner">
+    <div class="brand">
+      <!-- Christmas Tree Emoji as "Logo" -->
+      <div class="brand__mark" aria-hidden="true">🎄</div>
+      <div class="brand__text">
+        <h1 class="brand__title">WishBox</h1>
+        <p class="brand__subtitle">WDP Projekt WS25/26</p>
+      </div>
+    </div>
+
+    <nav class="toolbar" aria-label="Aktionen">
+      <button class="btn" id="btnBurger" type="button" aria-label="Menü öffnen" style="display: none;">☰</button>
+      <button class="btn btn--primary" id="btnCreateWishlist" type="button">+ Neue Wunschliste</button>
+    </nav>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Statistiken">
+      <section class="card">
+        <h2 class="card__title">Statistiken</h2>
+        <dl class="stats" id="stats">
+          <div class="stats__row">
+            <dt>Anzahl Wunschlisten</dt>
+            <dd id="statWishlists">–</dd>
+          </div>
+          <div class="stats__row">
+            <dt>Anzahl Wünsche</dt>
+            <dd id="statWishes">–</dd>
+          </div>
+          <div class="stats__row">
+            <dt>Ø Wünsche pro Liste</dt>
+            <dd id="statAvg">–</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Top 3 Wünsche</h2>
+        <ol class="top" id="topWishes" aria-live="polite"></ol>
+      </section>
+
+      <section class="card">
+        <h2 class="card__title">Status</h2>
+        <p class="muted" id="statusLine">Verbinde…</p>
+        <div class="chips" id="chips"></div>
+      </section>
+    </aside>
+
+    <main id="main" class="main" role="main">
+      <section class="controls" aria-label="Filtern und Sortieren">
+        <div class="field">
+          <label for="filterTitle">Filtern nach Titel</label>
+          <input id="filterTitle" type="search" placeholder="z.B. Essenswunschliste" autocomplete="off" />
+        </div>
+
+        <div class="field">
+          <label for="sortBy">Sortieren nach</label>
+          <select id="sortBy">
+            <option value="createdAt">Erstelldatum</option>
+            <option value="title">Titel</option>
+          </select>
+        </div>
+
+        <div class="field field--compact">
+          <label>&nbsp;</label>
+          <button class="btn" id="btnToggleDir" type="button" aria-label="Sortierrichtung ändern">
+            ↓ Absteigend
+          </button>
+        </div>
+
+        <div class="field mobile-only" style="display: none;">
+          <label>&nbsp;</label>
+          <button class="btn btn--primary" id="btnCreateWishlistMobile" type="button" style="width: 100%;">+ Neue
+            Wunschliste</button>
+        </div>
+      </section>
+
+      <section class="list" aria-label="Wunschlisten" id="wishlistList">
+        <!-- Comes from JS -->
+      </section>
+
+      <section class="empty" id="emptyState" hidden>
+        <h2>Keine Wunschlisten gefunden</h2>
+        <p>Lege eine neue Wunschliste an oder ändere den Filter.</p>
+      </section>
+    </main>
+  </div>
+
+  <footer class="site-footer" role="contentinfo">
+    <p>🎄 WishBox – WDP Projekt WS 2025/26 | Frontend</p>
+  </footer>
+
+  <!-- Dialog: Wishlist details -->
+  <dialog class="dialog" id="wishlistDialog" aria-labelledby="dlgTitle">
+    <form method="dialog" class="dialog__frame">
+      <header class="dialog__header">
+        <div class="dialog__title">
+          <h2 id="dlgTitle">Wunschliste</h2>
+          <p class="muted" id="dlgMeta">–</p>
+        </div>
+        <menu class="dialog__menu">
+          <button class="btn" id="btnCloseDialog" value="cancel" type="submit">Schließen</button>
+        </menu>
+      </header>
+
+      <section class="dialog__body">
+        <section class="panel">
+          <h3>Titel bearbeiten</h3>
+          <div class="inline" role="group" aria-label="Wunschliste umbenennen">
+            <input id="dlgWishlistTitle" type="text" placeholder="Titel" />
+            <button class="btn btn--primary" id="btnSaveWishlistTitle" type="button">Speichern</button>
+            <button class="btn btn--danger" id="btnDeleteWishlist" type="button">Liste löschen</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel__head">
+            <h3>Wünsche</h3>
+            <p class="muted">Titel &amp; Menge kannst du direkt in der Liste ändern.</p>
+          </div>
+
+          <ul class="wishes" id="dlgWishes" aria-live="polite"></ul>
+
+          <hr class="sep" />
+
+          <h3>Neuen Wunsch hinzufügen</h3>
+          <div class="inline" role="group" aria-label="Neuen Wunsch hinzufügen">
+            <input id="newWishTitle" type="text" placeholder="z.B. Lebkuchen" />
+            <input id="newWishQty" type="number" min="1" step="1" value="1" />
+            <button class="btn btn--primary" id="btnAddWish" type="button">Hinzufügen</button>
+          </div>
+        </section>
+      </section>
+
+      <footer class="dialog__footer">
+        <p class="muted">Tipp: "Esc" schließt den Dialog.</p>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Dialog: Create wishlist -->
+  <dialog class="dialog" id="createDialog" aria-labelledby="createTitle">
+    <form method="dialog" class="dialog__frame" id="createForm">
+      <header class="dialog__header">
+        <div class="dialog__title">
+          <h2 id="createTitle">Neue Wunschliste</h2>
+          <p class="muted">Gib einen Titel ein und bestätige.</p>
+        </div>
+        <menu class="dialog__menu">
+          <button class="btn" value="cancel" type="submit">Schließen</button>
+        </menu>
+      </header>
+
+      <section class="dialog__body">
+        <div class="field">
+          <label for="createWishlistTitle">Titel</label>
+          <input id="createWishlistTitle" type="text" placeholder="z.B. Essenswunschliste" required />
+        </div>
+      </section>
+
+      <footer class="dialog__footer dialog__footer--actions">
+        <button class="btn btn--primary" id="btnCreateConfirm" type="button">Erstellen</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <div class="toasts" aria-live="polite" aria-atomic="true" id="toasts"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
